@@ -1,0 +1,128 @@
+\documentclass{beamer}
+\usetheme{default}
+
+\newcommand{\defeq}{\overset{\text{def}}\equiv}
+
+\begin{document}
+\begin{centering}
+\begin{frame}
+Reasoning About Multi-Stage Programs\\
+Jun Inoue and Walid Taha\\
+\end{frame}
+
+\begin{frame}
+Multi-Staged Programming: What is it?
+\end{frame}
+\end{centering}
+
+\begin{frame}
+Normal Model: Running a program on some input produces some output
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+\end{frame}
+
+\begin{frame}
+Staged Model: Running a program on some input produces some output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+which then can be run on some other input, to produce some more output \textit{which might be a program}\\
+etc...
+\end{frame}
+
+%Intro to staging language
+\begin{frame}{New language constructs}
+\begin{itemize}
+  \item $\langle ... \rangle$ means delay evaluation of enclosed code until the next stage. E.g. $\langle 5 * 2 \rangle$ is a program that when run produces the product of 5 and 2.
+  \item \textasciitilde means evaluate this piece right away, and can only occur within $\langle \rangle$. E.g. $\langle 5 * $\textasciitilde $(1 + 1)\rangle$ evaluates to $\langle 5 * 2\rangle$ immediately.
+  \item $!$ means take a program and run it. E.g. $!\langle 5 * 2 \rangle$ evaluates to 10.
+\end{itemize}
+
+Other than this, the language used is the traditional $\lambda$ calculus. This extended version is refered to as $\lambda ^U$
+\end{frame}
+
+\begin{frame}{Obligatory power function example}
+\small
+\texttt{let rec power n x = if n = 1 then x else x * power (n-1) x}\\
+\texttt{let rec genpow n x = if n = 1 then x}\\
+\texttt{\ \ \ \ \ \ \ \ else $\langle$ \textasciitilde x * \textasciitilde (genpow (n-1) x) $\rangle$}\\
+\texttt{let stpow = ! $\langle$ fun z $\rightarrow$ \textasciitilde (genpow n $\langle$ z $\rangle$ ) $\rangle$}
+\end{frame}
+
+\begin{frame}{Staging Erasure}
+Define the erasure of staging from an expression to be noted as $||e||$\\
+\begin{itemize}
+  \item $||x|| \defeq x$
+  \item $||c|| \defeq c$
+  \item $||\lambda x.e|| \defeq \lambda x.||e||$
+  \item $||$\textasciitilde$e|| \defeq ||e||$
+  \item $||e_1 e_2|| \defeq ||e_1|| ||e_2||$
+  \item $||\langle e \rangle|| \defeq ||e||$
+  \item $||!e|| \defeq ||e||$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Calling Convention Review}
+\begin{itemize}
+  \item Call By Name: arguments are not evaluated before a function call, are syntactically inserted into the function body, and are instead evaluated at \textit{each place} within the function where they are needed.
+  \item Call By Value: arguments are evaluated once before being passed to a function call, and the resulting value is substituted everwhere.
+  \item Call By Need: arguments are not evaluated before a function call, but if needed more than once in a body their result is stored in a temporary and reused. This is what Haskell uses.
+\end{itemize}
+\end{frame}
+
+%%new beta reduction rule here maybe? somewhere else maybe? needs to go somewhere
+
+\begin{frame}{Erasure Theorem, Call By Name Edition}
+$\lambda _n ^U \vdash e \rightarrow ^* t$ implies $\lambda _n ^U \vdash ||e|| \rightarrow ^* ||t||$.\\
+\vspace{1cm} 
+
+That is, if we use the call by name, then terms that evaulate to some
+value will always evaluate to that same value with the staging
+annotations erased on both the term and the value. If a term halts,
+its erased counterpart will also halt.
+\end{frame}
+
+\begin{frame}{Erasure Theorem, Call By Value Edition}
+$\lambda _v ^U \vdash e \rightarrow ^* t$ implies $\lambda _n ^U \vdash ||e|| \rightarrow ^* ||t||$.\\
+\vspace{1cm}
+
+That is, if we use the call by value, then terms that evaulate to some
+value will always evaluate to that same value with the staging
+annotations erased on both the term and the value \textit{under call
+  by name}. If a term halts, its erased counterpart will also halt
+\textit{under call by name}.
+\end{frame}
+
+%%Commuting diagrams necessary here?
+
+%%call by value example for stpow?
+
+\begin{frame}{Applicative Bisimulation}
+Extremely intuitive definition: Run two programs. If they both halt
+and produce the same output (which could be other programs that you
+again need to bisimulate), they are equivalent.
+\end{frame}
+
+\end{document}
