@@ -71,41 +71,51 @@ Other than this, the language used is the traditional $\lambda$ calculus. This e
 \texttt{let stpow = ! $\langle$ fun z $\rightarrow$ \textasciitilde (genpow n $\langle$ z $\rangle$ ) $\rangle$}
 \end{frame}
 
-\begin{frame}
-CBV expressions are distinguished by context: 
+\begin{frame}{MSP Design Patterns}
 
-\begin{equation*}
-\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle) 0] \rangle
-\Downarrow^0 \langle \lambda x.1 \rangle
-\end{equation*}
+\begin{itemize}
+  \item Continuation Passing Style: needed for ``name'' (binding)
+    generation for loops and conditionals
+  \item Monads: code generation can be viewed as an effect; Monad can
+    aid in generating binding statements for loops and conditionals
+  \item Functors: help make code more staged code more modular
+\end{itemize}
 
-
-But the following gets ``stuck'', because $x$ is bound to a variable
-on level 1 (that hasn't been computed yet):
-
-\begin{equation*}
-\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle)
- ((\lambda\_.0) \Uparrow^0
- x)] \rangle
-\end{equation*}
+See ``Multi-Stage Programming with Functors and Monads: Eliminating
+Abstraction Overhead from Generic Code''
 
 \end{frame}
 
-\begin{frame}
+\begin{frame}{CPS Example}
+\small
 
-A modified substitution ($\beta$ reduction rule) for CBV:
+\texttt{let one = .$\langle$ 1 $\rangle$. and plus x y =
+  .$\langle$.\textasciitilde x  + .\textasciitilde y $\rangle$.}
 
-\begin{equation*}
-\lambda x.C[(\lambda y.e^0) x] = \lambda x.C[[x/y]e^0]
-\end{equation*}
+\vspace{3mm}
 
-assuming both contexts are not-staged:
+Want to generate code that generates code the $(y + 1) +
+(x + (y + 1))$, but with no redundant $(y + 1)$
 
-\begin{equation*}
-C[(\lambda y.e^0) x], C[[x/y]e^0]  \in E^0
-\end{equation*}
+\vspace{3mm}
+
+\texttt{let letgen exp k = .$\langle$ let t = .\textasciitilde exp in
+  .\textasciitilde (k  .$\langle$ t $\rangle$.) $\rangle$. }
+
+\vspace{3mm}
+
+\texttt{let param\_code plus one }
+
+\texttt{  let gen x y k = }
+
+\texttt{      letgen (plus y one) (fun ce -> k (plus ce  (plus x ce)))}
+
+\texttt{  and k0 x = x}
+
+\texttt{  in  .$\langle$ fun x y ->  .\textasciitilde (gen .$\langle$ x $\rangle$ .$\langle$ y $\rangle$. k0 $\rangle$.  }
 
 \end{frame}
+
 
 
 \begin{frame}{Staging Erasure}
@@ -127,6 +137,44 @@ Define the erasure of staging from an expression to be noted as $||e||$\\
   \item Call By Value: arguments are evaluated once before being passed to a function call, and the resulting value is substituted everwhere.
   \item Call By Need: arguments are not evaluated before a function call, but if needed more than once in a body their result is stored in a temporary and reused. This is what Haskell uses.
 \end{itemize}
+\end{frame}
+
+
+\begin{frame}{CBV expressions are distinguished by context:}
+
+Is $(\lambda\_) x$ the same at $0$?:
+
+\begin{equation*}
+\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle) 0] \rangle
+\Downarrow^0 \langle \lambda x.1 \rangle
+\end{equation*}
+
+
+But the following gets ``stuck'', because $x$ is bound to a variable
+on level 1 (that hasn't been computed yet):
+
+\begin{equation*}
+\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle)
+ ((\lambda\_.0) 
+ x)] \rangle \Uparrow^0
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}
+
+A modified substitution ($\beta$ reduction rule) for CBV:
+
+\begin{equation*}
+\lambda x.C[(\lambda y.e^0) x] = \lambda x.C[[x/y]e^0]
+\end{equation*}
+
+assuming both contexts are not-staged:
+
+\begin{equation*}
+C[(\lambda y.e^0) x], C[[x/y]e^0]  \in E^0
+\end{equation*}
+
 \end{frame}
 
 %%new beta reduction rule here maybe? somewhere else maybe? needs to go somewhere
