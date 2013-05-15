@@ -142,7 +142,7 @@ Define the erasure of staging from an expression to be noted as $||e||$\\
 
 \begin{frame}{CBV expressions are distinguished by context:}
 
-Is $(\lambda\_) x$ the same at $0$?:
+Is $(\lambda\_.0) x$ the same at $0$?:
 
 \begin{equation*}
 \langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle) 0] \rangle
@@ -205,9 +205,12 @@ annotations erased on both the term and the value \textit{under call
 %%call by value example for stpow?
 
 \begin{frame}{Applicative Bisimulation}
-Extremely intuitive definition: Run two programs. If they both halt
-and produce the same output (which could be other programs that you
-again need to bisimulate), they are equivalent.
+Extremely intuitive definition: Run two programs on the same input. If
+they both halt and produce the same output (which could be other
+programs that you again need to bisimulate), they are extensionally
+equivalent.
 \end{frame}
+
+
 
 \end{document}
