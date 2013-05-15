@@ -71,6 +71,43 @@ Other than this, the language used is the traditional $\lambda$ calculus. This e
 \texttt{let stpow = ! $\langle$ fun z $\rightarrow$ \textasciitilde (genpow n $\langle$ z $\rangle$ ) $\rangle$}
 \end{frame}
 
+\begin{frame}
+CBV expressions are distinguished by context: 
+
+\begin{equation*}
+\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle) 0] \rangle
+\Downarrow^0 \langle \lambda x.1 \rangle
+\end{equation*}
+
+
+But the following gets ``stuck'', because $x$ is bound to a variable
+on level 1 (that hasn't been computed yet):
+
+\begin{equation*}
+\langle \lambda x.^\sim [(\lambda\_.\langle 1 \rangle)
+ ((\lambda\_.0) \Uparrow^0
+ x)] \rangle
+\end{equation*}
+
+\end{frame}
+
+\begin{frame}
+
+A modified substitution ($\beta$ reduction rule) for CBV:
+
+\begin{equation*}
+\lambda x.C[(\lambda y.e^0) x] = \lambda x.C[[x/y]e^0]
+\end{equation*}
+
+assuming both contexts are not-staged:
+
+\begin{equation*}
+C[(\lambda y.e^0) x], C[[x/y]e^0]  \in E^0
+\end{equation*}
+
+\end{frame}
+
+
 \begin{frame}{Staging Erasure}
 Define the erasure of staging from an expression to be noted as $||e||$\\
 \begin{itemize}
